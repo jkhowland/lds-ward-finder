@@ -1,0 +1,48 @@
+div#adcontainer {
+position: absolute;
+top: 0px;
+left: 0px;
+display: block;
+width: 480px;
+height: 50px;
+background: #eaeaf1;
+overflow: hidden;
+color: #929292;
+z-index:1;
+}
+
+div#liftimg{
+position: absolute;
+top: 0px;
+left: 80px;
+overflow: hidden;
+float:left;
+}
+
+div#liftimg img{
+height: 50px;
+width: 96px;
+}
+
+div#lifttxt{
+text-shadow: 0 -1px 1px rgba(255, 255, 255, .9);
+font: 10px/13px Verdana, Helvetica, Arial, sans-serif;
+position:relative;
+z-index:-1;
+width: 400px;
+}
+
+div#lifttxt p{
+margin-top: 3px;
+margin-bottom: 3px;
+margin-left: 180px;
+}
+
+span#lifttag p{
+position: absolute;
+top: 30px;
+left: 0px;
+font-size: 8px;
+text-shadow: 0 1px 1px rgba(255, 255, 255, .8);
+}
+

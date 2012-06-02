@@ -1,0 +1,38 @@
+div#adcontainer {
+position: relative;
+top: 0px;
+left: 0px;
+display: block;
+width: 320px;
+height: 75px;
+overflow: hidden;
+}
+
+div#liftimg{
+position: absolute;
+left: 0px;
+top: 0;
+overflow: hidden;
+float:left;
+}
+
+div#liftimg img{
+height: 75px;
+width: 120px;
+}
+
+div#lifttxt{
+margin-left: 130px;
+padding: 3px;
+height:75px;
+text-shadow: 0 -1px 1px rgba(255, 255, 255, .9);
+font: 11px/13px Verdana, Helvetica, Arial, sans-serif;
+}
+
+span#lifttag p{
+position:fixed;
+
+left: 130px;
+font-size: 8px;
+text-shadow: 0 1px 1px rgba(255, 255, 255, .8);
+}

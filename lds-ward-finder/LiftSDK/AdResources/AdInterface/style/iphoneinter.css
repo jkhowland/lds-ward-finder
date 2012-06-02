@@ -1,0 +1,30 @@
+div#adcontainer {
+position: absolute;
+top: 0px;
+left: 0px;
+width: 320px;
+height: 480px;
+background: #f1f1f1;
+overflow: hidden;
+color: #555;
+}
+
+div#liftimg{
+
+}
+
+div#liftimg img{
+margin:80px 14px 0 14px;
+}
+
+div#lifttxt{
+text-align:center;
+margin:0 10px;
+text-shadow: 0 -1px 1px rgba(255, 255, 255, .9);
+font: 18px/22px Verdana, Helvetica, Arial, sans-serif;
+}
+
+span#lifttag p{
+font-size: 10px;
+text-shadow: 0 1px 1px rgba(255, 255, 255, .8);
+}
