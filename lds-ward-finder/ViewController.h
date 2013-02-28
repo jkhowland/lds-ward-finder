@@ -18,7 +18,6 @@
 #import "AppSettings.h"
 #import <MessageUI/MFMessageComposeViewController.h>
 #import <MessageUI/MFMailComposeViewController.h>
-#import "AddThis.h"
 #import "CoreLocationController.h"
 #import <MapKit/MapKit.h>
 
@@ -121,26 +120,26 @@
     
 }
 
-@property (nonatomic, retain) MKPlacemark *placemark;
+@property (nonatomic, strong) MKPlacemark *placemark;
 
-@property (nonatomic, retain) UIScrollView * scrollView;
-@property (nonatomic, retain) UIPageControl * pageControl;
-@property (nonatomic, retain) NSMutableArray * informationViews;
+@property (nonatomic, strong) UIScrollView * scrollView;
+@property (nonatomic, strong) UIPageControl * pageControl;
+@property (nonatomic, strong) NSMutableArray * informationViews;
 
-@property (nonatomic, retain) IBOutlet TPKeyboardAvoidingScrollView *keyScrollView;
-@property (nonatomic, retain) IBOutlet UITextField * textField1;
-@property (nonatomic, retain) IBOutlet UITextField * textField2;
-@property (nonatomic, retain) IBOutlet UITextField * textField3;
-@property (nonatomic, retain) IBOutlet UITextField * textField4;
-@property (nonatomic, retain) IBOutlet UITextField * textField5;
+@property (nonatomic, strong) IBOutlet TPKeyboardAvoidingScrollView *keyScrollView;
+@property (nonatomic, strong) IBOutlet UITextField * textField1;
+@property (nonatomic, strong) IBOutlet UITextField * textField2;
+@property (nonatomic, strong) IBOutlet UITextField * textField3;
+@property (nonatomic, strong) IBOutlet UITextField * textField4;
+@property (nonatomic, strong) IBOutlet UITextField * textField5;
 
-@property (nonatomic, retain) UISegmentedControl *nextPreviousControl;
-@property (nonatomic, retain) UIToolbar *keyboardToolbar;
+@property (nonatomic, strong) UISegmentedControl *nextPreviousControl;
+@property (nonatomic, strong) UIToolbar *keyboardToolbar;
 
-@property (nonatomic, retain) MKReverseGeocoder *reverseGeocoder;
-@property (nonatomic, retain) CLGeocoder *reverseCLGeocoder;
+@property (nonatomic, strong) MKReverseGeocoder *reverseGeocoder;
+@property (nonatomic, strong) CLGeocoder *reverseCLGeocoder;
 
-@property (nonatomic, retain) CoreLocationController *CLController;
+@property (nonatomic, strong) CoreLocationController *CLController;
 
 @property (nonatomic, assign) BOOL aNewSearch;
 

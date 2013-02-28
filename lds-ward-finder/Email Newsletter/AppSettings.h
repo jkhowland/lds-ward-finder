@@ -27,16 +27,22 @@ static NSString * const kWorshipTimeKey = @"worshipTime";
 static NSString * const kLatitudeKey = @"latitude";
 static NSString * const kLongitudeKey = @"longitude";
 
+static NSString * const kWardType = @"ward";
+static NSString * const kYSAType = @"ward.ysa";
+
 @interface AppSettings : NSObject {
 
 }
 
-@property (nonatomic, assign) NSString * defaultType;
+@property (nonatomic, weak) NSString * defaultType;
 @property (nonatomic) BOOL invitedToRegister;
 @property (nonatomic) int launchCount;
 @property (nonatomic) BOOL gpsPurchased;
 @property (nonatomic) BOOL newVersionInvited;
+@property (nonatomic, strong, readonly) NSArray *userWards;
 
 + (AppSettings*)sharedSettings;
+
+- (void) addWardToUserWards:(NSDictionary *)wardDictionary;
 
 @end

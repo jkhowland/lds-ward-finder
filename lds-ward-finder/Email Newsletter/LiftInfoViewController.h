@@ -24,15 +24,15 @@
     IBOutlet UIButton *highlightedButton2;
     
 	
-	id<SettingsViewControllerDelegate> _delegate;	
+	id<SettingsViewControllerDelegate> __weak _delegate;	
 }
 
 
-@property (nonatomic,assign) id<SettingsViewControllerDelegate> delegate;
+@property (nonatomic,weak) id<SettingsViewControllerDelegate> delegate;
 
-@property (nonatomic, retain) UIScrollView * scrollView;
-@property (nonatomic, retain) UIPageControl * pageControl;
-@property (nonatomic, retain) NSMutableArray * appListingViews;
+@property (nonatomic, strong) UIScrollView * scrollView;
+@property (nonatomic, strong) UIPageControl * pageControl;
+@property (nonatomic, strong) NSMutableArray * appListingViews;
 
 
 - (IBAction)changePage:(id)sender;

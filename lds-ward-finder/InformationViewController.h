@@ -32,15 +32,15 @@
 
 }
 
-@property (nonatomic, assign) IBOutlet id <InformationViewControllerDelegate, NSObject> delegate;
+@property (nonatomic, weak) IBOutlet id <InformationViewControllerDelegate, NSObject> delegate;
 
-@property (nonatomic, retain) NSString * address;
-@property (nonatomic, retain) NSString * phoneNumber;
-@property (nonatomic, retain) NSString * bishopsName;
-@property (nonatomic, retain) NSString * wardName;
-@property (nonatomic, retain) NSString * firstMeetingTime;
-@property (nonatomic, retain) NSString * worshipServiceTime;
-@property (nonatomic, retain) NSString * mapImage;
+@property (nonatomic, strong) NSString * address;
+@property (nonatomic, strong) NSString * phoneNumber;
+@property (nonatomic, strong) NSString * bishopsName;
+@property (nonatomic, strong) NSString * wardName;
+@property (nonatomic, strong) NSString * firstMeetingTime;
+@property (nonatomic, strong) NSString * worshipServiceTime;
+@property (nonatomic, strong) NSString * mapImage;
 
 
 -(id)initWithPageNumber:(int)page;

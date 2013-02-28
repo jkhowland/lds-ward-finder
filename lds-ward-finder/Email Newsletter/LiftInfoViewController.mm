@@ -132,7 +132,7 @@
 
 - (void) bannerButton:(NSString *) navURL
 {
-	WebView * web = [[[WebView alloc] init] autorelease];
+	WebView * web = [[WebView alloc] init];
 	//web.delegate = self;
 	
 	NSString *urlString = navURL;
@@ -217,9 +217,6 @@
 }
 
 
-- (void)dealloc {
-    [super dealloc];
-}
 
 - (IBAction)showNewsletterAnimated:(BOOL)animated {
     

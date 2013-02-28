@@ -22,7 +22,6 @@
 	 popupQuery.actionSheetStyle = UIActionSheetStyleBlackOpaque;
 	 [popupQuery showInView:self.view];
 	 
-	 [popupQuery release];
 	 }
 	 
 	 /*
@@ -116,7 +115,6 @@
 	
 	UIBarButtonItem *actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(showActionSheet:)];
 	self.navigationItem.rightBarButtonItem = actionButton;
-	[actionButton release];
 	
 	[super viewDidLoad];
 
@@ -157,9 +155,6 @@
 }
 
 
-- (void)dealloc {
-    [super dealloc];
-}
 
 
 @end

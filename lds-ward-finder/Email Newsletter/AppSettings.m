@@ -7,23 +7,21 @@
 //
 
 #import "AppSettings.h"
-#import "SynthesizeSingleton.h"
+#import "CWLSynthesizeSingleton.h"
 
 static NSString *const kDefaultType = @"defaultType";
 static NSString *const kInvitedToRegister = @"invitedToRegister";
 static NSString *const kNewVersionInvited = @"newVersionInvited";
 static NSString *const kLaunchCount = @"launchCount";
 static NSString *const kGpsPurchased = @"gpsPurchased";
-
+static NSString *const kUserWardsKey = @"userWards";
 
 @implementation AppSettings
 
-
-SYNTHESIZE_SINGLETON_FOR_CLASS(AppSettings, sharedSettings);
+CWL_SYNTHESIZE_SINGLETON_FOR_CLASS_WITH_ACCESSOR(AppSettings, sharedSettings);
 
 - (NSString *)defaultType {
-    return @"ward";
-//	return [[NSUserDefaults standardUserDefaults] stringForKey:kDefaultType];
+	return [[NSUserDefaults standardUserDefaults] stringForKey:kDefaultType];
 }
 
 - (void)setDefaultType:(NSString *)defaultType {
@@ -86,6 +84,24 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(AppSettings, sharedSettings);
 }
 
 
+- (void) addWardToUserWards:(NSDictionary *)wardDictionary {
 
+    NSArray * wardArray = [[NSUserDefaults standardUserDefaults] objectForKey:kUserWardsKey];
+    
+    NSMutableArray * newWardArray = [NSMutableArray arrayWithArray:wardArray];
+    
+    if(newWardArray == nil){
+        newWardArray = [[NSMutableArray alloc] init];
+    }
+    
+    [newWardArray addObject:wardDictionary];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:[NSArray arrayWithArray:newWardArray] forKey:kUserWardsKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (NSArray *) userWards {
+    return [[NSUserDefaults standardUserDefaults] objectForKey:kUserWardsKey];
+}
 
 @end

@@ -11,11 +11,11 @@
 
 @interface CoreLocationController : NSObject <CLLocationManagerDelegate> {
 	CLLocationManager *locMgr;
-	id delegate;
+	id __weak delegate;
 }
 
-@property (nonatomic, retain) CLLocationManager *locMgr;
-@property (nonatomic, assign) id delegate;
+@property (nonatomic, strong) CLLocationManager *locMgr;
+@property (nonatomic, weak) id delegate;
 
 @end
 

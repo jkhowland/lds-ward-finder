@@ -18,9 +18,9 @@
 	
 }
 
-@property (nonatomic, retain) IBOutlet UIWebView * webView;
-@property (nonatomic, retain) IBOutlet UIView * mview;
-@property (nonatomic, retain) NSString * webAddress;
+@property (nonatomic, strong) IBOutlet UIWebView * webView;
+@property (nonatomic, strong) IBOutlet UIView * mview;
+@property (nonatomic, strong) NSString * webAddress;
 
 -(IBAction) dismissView;
 -(IBAction) showActionSheet:(id)sender;

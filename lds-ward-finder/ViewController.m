@@ -11,26 +11,6 @@
 
 @implementation ViewController
 
-
-@synthesize pageControl;
-@synthesize scrollView;
-@synthesize informationViews;
-@synthesize reverseGeocoder;
-@synthesize reverseCLGeocoder;
-
-@synthesize keyScrollView;
-@synthesize textField1 = _textField1;
-@synthesize textField2 = _textField2;
-@synthesize textField3 = _textField3;
-@synthesize textField4 = _textField4;
-@synthesize textField5 = _textField5;
-
-@synthesize nextPreviousControl;
-@synthesize keyboardToolbar;
-
-
-
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -89,15 +69,19 @@
     
     [AppSettings sharedSettings].gpsPurchased = YES;
     
+    if([AppSettings sharedSettings].defaultType == nil) {
+        [AppSettings sharedSettings].defaultType = kWardType;
+    }
+    
     if([AppSettings sharedSettings].launchCount == 0){
         
         if (![AppSettings sharedSettings].invitedToRegister) {
             
-            UIAlertView *dialog = [[[UIAlertView alloc] initWithTitle:@"We'd love to keep in touch for support, and to share news about other apps we're working on. Sign up for our newsletter."
+            UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:@"We'd love to keep in touch for support, and to share news about other apps we're working on. Sign up for our newsletter."
                                                               message:nil
                                                              delegate:self 
                                                     cancelButtonTitle:@"No Thanks"
-                                                    otherButtonTitles:@"Subscribe Now", @"Remind Me Later", nil] autorelease];
+                                                    otherButtonTitles:@"Subscribe Now", @"Remind Me Later", nil];
             [dialog show];
              
         }
@@ -106,11 +90,11 @@
     }
     else if (![AppSettings sharedSettings].newVersionInvited) {
         
-        UIAlertView *dialog = [[[UIAlertView alloc] initWithTitle:@"We hope you like our new update to this app. We'd love to keep in touch for support, and to share news about other apps we're working on. Sign up for our newsletter."
+        UIAlertView *dialog = [[UIAlertView alloc] initWithTitle:@"We hope you like our new update to this app. We'd love to keep in touch for support, and to share news about other apps we're working on. Sign up for our newsletter."
                                                           message:nil
                                                          delegate:self 
                                                 cancelButtonTitle:@"No Thanks"
-                                                otherButtonTitles:@"Subscribe Now", @"Remind Me Later", nil] autorelease];
+                                                otherButtonTitles:@"Subscribe Now", @"Remind Me Later", nil];
         [dialog show];
         
         
@@ -132,9 +116,11 @@
 	CLController.delegate = self;
 	[CLController.locMgr startUpdatingLocation];
     
-    //TODO - Write a plist to the app, and load that plist when this view loads
     
-    kNumberOfPages = 1;
+    //TODO - store locations in NSUserDefaults load app at first with 'pinned locations'
+    // Beginning of paging scroll view
+    
+    kNumberOfPages = 4;
     
     NSMutableArray *controllers = [[NSMutableArray alloc] init];
     
@@ -154,9 +140,12 @@
     
     pageControl.numberOfPages = kNumberOfPages-1;
     pageControl.currentPage = kNumberOfPages-1;
-        
+
+    
+    //End of paging scroll view
+    
     // Create a default style RevealSidebarView
-    centralView = [[JTRevealSidebarView defaultViewWithFrame:self.view.bounds] retain];
+    centralView = [JTRevealSidebarView defaultViewWithFrame:self.view.bounds];
     
     [centralView.contentView addSubview:startscreen];
     
@@ -167,7 +156,7 @@
     [self.view addSubview:centralView];
     [self.view addSubview:coverScreen];
     
-    webview = [[[UIWebView alloc] init] autorelease];
+    webview = [[UIWebView alloc] init];
     
     webview.alpha = 0;
     [self.view addSubview:webview];
@@ -177,18 +166,15 @@
     webview.alpha = 1; // also fade to transparent
     [UIView commitAnimations];
     
-    
     webview.frame = CGRectMake(0, 0, 320, 480);
     
-    NSString * text = [[NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"appsbylift" ofType:@"html"] encoding:NSUTF8StringEncoding error:nil] retain];	
+    NSString * text = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"appsbylift" ofType:@"html"] encoding:NSUTF8StringEncoding error:nil];	
     [webview loadHTMLString:text baseURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] resourcePath]]];
-    [text release];
     
     [self performSelector:@selector(removeWebView) withObject:nil afterDelay:4];  
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];	
-    
     
 }
 
@@ -222,15 +208,9 @@
 
 - (void)dealloc {
 	
-    [initialLocation release];
-    [reverseGeocoder release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-    [CLController release];
-    [wardURL release];
-	[keyboardToolbar release], keyboardToolbar = nil;
-	[nextPreviousControl release], nextPreviousControl = nil;
-    [savedDictionary release];
-    [super dealloc];
+	keyboardToolbar = nil;
+	nextPreviousControl = nil;
 }
 
 
@@ -244,14 +224,14 @@
     if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending){
     
         self.reverseGeocoder =
-        [[[MKReverseGeocoder alloc] initWithCoordinate:initialLocation.coordinate] autorelease];
+        [[MKReverseGeocoder alloc] initWithCoordinate:initialLocation.coordinate];
         reverseGeocoder.delegate = self;
         [reverseGeocoder start];    
         
     }
     else {
     self.reverseGeocoder =
-        [[[MKReverseGeocoder alloc] initWithCoordinate:initialLocation.coordinate] autorelease];
+        [[MKReverseGeocoder alloc] initWithCoordinate:initialLocation.coordinate];
         reverseGeocoder.delegate = self;
         [reverseGeocoder start];    
     }
@@ -266,7 +246,6 @@
 											  cancelButtonTitle:@"OK"
 											  otherButtonTitles:nil];
     [alertView show];
-    [alertView release];
 }
 
 - (void)reverseGeocoder:(MKReverseGeocoder *)geocoder didFindPlacemark:(MKPlacemark *)placemark
@@ -381,12 +360,12 @@
         
     }
     else{
-        UIAlertView *alert = [[[UIAlertView alloc] 
+        UIAlertView *alert = [[UIAlertView alloc] 
                                initWithTitle: @"Sorry" 
                                message:@"We couldn't get your GPS location. Try again later, or use a manual search."
                                delegate:nil
                                cancelButtonTitle:nil 
-                               otherButtonTitles:@"OK", nil] autorelease];
+                               otherButtonTitles:@"OK", nil];
         
         [alert show];
         
@@ -409,7 +388,7 @@
     
     latitudeLabel = [NSString stringWithFormat:@"%f",latitude];
     
-    initialLocation = [location retain];
+    initialLocation = location;
     haveCoordinate = YES;
     
     
@@ -537,7 +516,6 @@
     shareSheet.delegate = self;
     
     [shareSheet showInView:self.view];
-    [shareSheet release];
     
     //	SHKItem *item = [SHKItem text:text];
     //	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
@@ -559,51 +537,12 @@
     
     twitterText = [twitterText stringByReplacingOccurrencesOfString:@", United States" withString:@""];
     
-    
-    [AddThisSDK setAddThisPubId:@"ra-4eda3ed73c9d7c1b"];
-    [AddThisSDK setAddThisApplicationId:@"4eda7478663f015e"];
-    
-    [AddThisSDK setFacebookAPIKey:@"254395284615023"];
-	[AddThisSDK setFacebookAuthenticationMode:ATFacebookAuthenticationTypeFBConnect];
-    
-    [AddThisSDK setTwitterConsumerKey:@"3423s3gwsPdUorz0TWF30Q"];
-    [AddThisSDK setTwitterConsumerSecret:@"W0LXV71buxJdqzvqpeiA0WnsfUiG2BCZB18sBgZCB4"];
-    [AddThisSDK setTwitterCallBackURL:@"http://appsbylift.com"];
-    
-    [AddThisSDK setTwitterViaText:@"liftmn"];
-    
-    switch (buttonIndex) {
-        case 0:
-            [AddThisSDK shareURL:@"http://liftmn.com/wfd"
-                     withService:@"twitter"
-                           title:@"LDS Ward Finder found the chapel and time for us."
-                     description:twitterText];
-            break;
-        case 1:
-            [AddThisSDK shareURL:@"http://liftmn.com/wfd"
-                     withService:@"facebook"
-                           title:@"LDS Ward Finder found the chapel and time for us."
-                     description:text];
-            break;
-        case 2:
-            [self sendTextMessage:text];
-            
-            break;
-        case 3:
-            
-            [self emailCurrentPage:emailText];
-            
-            break;
-            
-            
-            break;
-    }
-    
+
 }
 
 -(void)sendTextMessage:(NSString *) withBody {
     
-    MFMessageComposeViewController *controller = [[[MFMessageComposeViewController alloc] init] autorelease];
+    MFMessageComposeViewController *controller = [[MFMessageComposeViewController alloc] init];
     if([MFMessageComposeViewController canSendText])
     {
         controller.body = withBody;    
@@ -625,7 +564,6 @@
     [mailComposer setMessageBody:textToBeSend isHTML:YES];
     [self presentModalViewController:mailComposer animated:YES];
     
-    [mailComposer release];
     
 }
 
@@ -647,9 +585,7 @@
 #pragma mark - Scrape Task
 
 - (void)myTask {
-    
-    NSString *result;
-    
+        
     UIApplication* app = [UIApplication sharedApplication];
     app.networkActivityIndicatorVisible = YES;
     
@@ -658,29 +594,27 @@
                 
         //use address from form to generate string to send in to geoCodeUsingAddress
         
-        NSString * nation = [[[NSString alloc]init]autorelease];
+        NSString * nation = [[NSString alloc]init];
         if([_textField5.text isEqualToString:@""]) {
             nation = @" United States";
         }
         else {
             nation = [NSString stringWithFormat:@"&n=%@",_textField5.text];        
         }
-        NSString *escaped_nation =  [nation stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
         
-        
-        NSString * geoSearch = [[[NSString alloc] init]autorelease];
+        NSString * geoSearch = [[NSString alloc] init];
         geoSearch = [NSString stringWithFormat:@"%@ %@, %@ %@ %@",_textField1.text,_textField2.text,_textField3.text,_textField4.text,nation];
         if([geoSearch isEqualToString:@" ,    United States"]) {
             [HUD hide:YES afterDelay:1];
             
             NSLog(@"it's blank");
             
-            UIAlertView *alert = [[[UIAlertView alloc] 
+            UIAlertView *alert = [[UIAlertView alloc] 
                                    initWithTitle: @"Sorry" 
                                    message:@"We couldn't find a church with the info given."
                                    delegate:nil
                                    cancelButtonTitle:nil 
-                                   otherButtonTitles:@"OK", nil] autorelease];
+                                   otherButtonTitles:@"OK", nil];
             
             [alert show];
             
@@ -718,7 +652,7 @@
     
     NSError* err = nil;
     NSURLResponse* response = nil;
-    NSMutableURLRequest* request = [[[NSMutableURLRequest alloc] init] autorelease];
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] init];
     
     NSURL*URL = [NSURL URLWithString:requestString];
     [request setURL:URL];
@@ -732,7 +666,7 @@
     
     savedDictionary = nil;
     
-    NSMutableDictionary * assignedLocations = [[[NSMutableDictionary alloc] init] autorelease];
+    NSMutableDictionary * assignedLocations = [[NSMutableDictionary alloc] init];
     
     for (NSDictionary *rawAssign in assignedArray) {
         
@@ -740,11 +674,12 @@
         
     }    
     
-    savedDictionary = [assignedLocations retain];
+    savedDictionary = assignedLocations;
         
     //Get the ID
     
     NSDictionary *ward = [assignedLocations objectForKey:[AppSettings sharedSettings].defaultType];
+    
     NSString * defaultId = [ward objectForKey:kIdKey];
 
     //Get the details for the ID
@@ -760,6 +695,7 @@
             [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:YES];
         
         }
+
 }
 
 
@@ -770,7 +706,7 @@
     
     NSError* errDetail = nil;
     NSURLResponse* responseDetail = nil;
-    NSMutableURLRequest* requestDetail = [[[NSMutableURLRequest alloc] init] autorelease];
+    NSMutableURLRequest* requestDetail = [[NSMutableURLRequest alloc] init];
     
     NSURL*URLDetail = [NSURL URLWithString:detailString];
     [requestDetail setURL:URLDetail];
@@ -819,7 +755,7 @@
     
     NSString * imageHTML = [NSString stringWithFormat:@"%@%@",firstHalf,secondHalf];
     
-    initialMapImage = [imageHTML retain];
+    initialMapImage = imageHTML;
     
     //Check number of contacts
     
@@ -885,7 +821,7 @@
     if (page >= kNumberOfPages) return;
     
     // replace the placeholder if necessary
-    InformationViewController *controller = [informationViews objectAtIndex:page];    
+    InformationViewController *controller = [_informationViews objectAtIndex:page];
         controller = [[InformationViewController alloc] initWithPageNumber:page];
         controller.delegate = self;
         controller.firstMeetingTime = initialFirstMeeting;
@@ -895,7 +831,7 @@
         controller.bishopsName = initialBishopName;
         controller.phoneNumber = initialBishopPhone;
         controller.mapImage = initialMapImage;
-        [informationViews replaceObjectAtIndex:page withObject:controller];
+        [_informationViews replaceObjectAtIndex:page withObject:controller];
 	
     // add the controller's view to the scroll view
     if (nil == controller.view.superview) {
@@ -1001,12 +937,12 @@
         else{
             badInfo = YES;
             // the server answer was not the one we expected
-            UIAlertView *alert = [[[UIAlertView alloc] 
+            UIAlertView *alert = [[UIAlertView alloc] 
                                    initWithTitle: @"Sorry" 
                                    message:@"We couldn't find anything with the info given."
                                    delegate:nil
                                    cancelButtonTitle:nil 
-                                   otherButtonTitles:@"OK", nil] autorelease];
+                                   otherButtonTitles:@"OK", nil];
             
             [alert show];
         }
@@ -1015,12 +951,12 @@
     else{
         badInfo = YES;
         // no result back from the server
-        UIAlertView *alert = [[[UIAlertView alloc] 
+        UIAlertView *alert = [[UIAlertView alloc] 
                                initWithTitle: @"Dang" 
                                message:@"We don't have a connection to the server."
                                delegate:nil
                                cancelButtonTitle:nil 
-                               otherButtonTitles:@"OK", nil] autorelease];
+                               otherButtonTitles:@"OK", nil];
         
         [alert show];
         
@@ -1201,10 +1137,6 @@
 			
 			NSArray *items = [[NSArray alloc] initWithObjects:controlItem, flex, barButtonItem, nil];
 			[keyboardToolbar setItems:items];
-			[control release];
-			[barButtonItem release];
-			[flex release];
-			[items release];			
 			
 			keyboardToolbar.frame = CGRectMake(beginCentre.x - (keyboardBounds.size.width/2), 
 											   beginCentre.y - (keyboardBounds.size.height/2) - keyboardToolbar.frame.size.height, 
@@ -1225,7 +1157,7 @@
 									   keyboardToolbar.frame.size.width, 
 									   keyboardToolbar.frame.size.height);
 	
-	[UIView commitAnimations];		
+	[UIView commitAnimations];
 	
 	//keyboardToolbarShouldHide = YES;
 }
@@ -1322,22 +1254,20 @@
  */
 
 - (void)launchExecution {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
 	
     // Start executing the requested task
-    [targetForExecution performSelector:methodForExecution withObject:objectForExecution];
+        [targetForExecution performSelector:methodForExecution withObject:objectForExecution];
 	
-    // Task completed, update view in main thread (note: view operations should
-    // be done only in the main thread)
-    [self performSelectorOnMainThread:@selector(cleanUp) withObject:nil waitUntilDone:NO];
+        // Task completed, update view in main thread (note: view operations should
+        // be done only in the main thread)
+        [self performSelectorOnMainThread:@selector(cleanUp) withObject:nil waitUntilDone:NO];
 	
-    [pool release];
+    }
 }
 
 - (void)cleanUp {
 	taskInProgress = NO;
-    [targetForExecution release];
-    [objectForExecution release];
 	
 }
 
