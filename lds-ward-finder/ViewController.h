@@ -24,7 +24,7 @@
 
 @class TPKeyboardAvoidingScrollView;
 
-@interface ViewController : UIViewController <SuccessPopupDelegate, UITextFieldDelegate,UIScrollViewDelegate,UIWebViewDelegate,SettingsViewControllerDelegate,MBProgressHUDDelegate,UIActionSheetDelegate,MFMessageComposeViewControllerDelegate,MFMailComposeViewControllerDelegate,CoreLocationControllerDelegate,MKMapViewDelegate, MKReverseGeocoderDelegate,UIWebViewDelegate> {
+@interface ViewController : UIViewController <UITextFieldDelegate,UIScrollViewDelegate,UIWebViewDelegate,SettingsViewControllerDelegate,MBProgressHUDDelegate,UIActionSheetDelegate,MFMessageComposeViewControllerDelegate,MFMailComposeViewControllerDelegate,CoreLocationControllerDelegate,MKMapViewDelegate, MKReverseGeocoderDelegate,UIWebViewDelegate,InformationViewControllerDelegate> {
     
     MKMapView *mapView;
     
@@ -115,6 +115,10 @@
     CLLocation * initialLocation;
     BOOL haveCoordinate;
 
+    NSMutableDictionary * savedDictionary;
+    
+    BOOL infoViewSentMe;
+    
 }
 
 @property (nonatomic, retain) MKPlacemark *placemark;
@@ -138,6 +142,8 @@
 
 @property (nonatomic, retain) CoreLocationController *CLController;
 
+@property (nonatomic, assign) BOOL aNewSearch;
+
 //keyboard actions
 - (IBAction)nextPrevious:(id)sender;
 - (IBAction)dismissKeyboard:(id)sender;
@@ -147,11 +153,13 @@
 //scrollviewactions
 - (IBAction)changePage:(id)sender;
 - (void)loadScrollViewWithPage:(int)page;
--(IBAction)openInMaps:(id)sender;
 
 - (IBAction)menuButtonPressed:(id)sender;
 
-- (void) infoViewDidPin:(InformationViewController*)showingInfoController;
+- (void)infoViewDidPin:(InformationViewController*)showingInfoController;
+- (void)infoViewDidMapIt:(InformationViewController*)showingInfoController;
+-(IBAction)openInMaps:(InformationViewController*)showingInfoController;
+
 - (void) presentSuccessView;
 - (void) geoCodeUsingAddress:(NSString *)address;
 - (void) settings;
@@ -161,6 +169,7 @@
 - (void) removeWebView;
 - (void) otherSetupAfterViewLoads;
 
+- (IBAction)anotherSearch:(id)sender;
 
 - (void)keyboardWillShow:(NSNotification *)notification;
 - (IBAction)searchButtonsPressed:(id)sender;
@@ -171,5 +180,7 @@
 - (void) gpsPlusMyTask;
 
 - (IBAction)showNewsletterAnimated:(BOOL)animated;
+
+-(IBAction)checkboxSelected:(id)sender;
 
 @end

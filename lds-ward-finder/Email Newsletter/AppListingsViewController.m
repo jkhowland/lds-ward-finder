@@ -72,7 +72,7 @@
 	
 	
 	if(socialB.tag == 0) 
-    {socialURL = @"http://liftmn.com/mobileland/lds-word-search/";
+    {socialURL = @"http://bit.ly/ldsws";
 		[self safariLink:socialURL];
 	}
 

@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "JSONKit.h"
 
 @implementation ViewController
 
@@ -26,6 +27,8 @@
 
 @synthesize nextPreviousControl;
 @synthesize keyboardToolbar;
+
+
 
 
 - (void)didReceiveMemoryWarning
@@ -226,7 +229,7 @@
     [wardURL release];
 	[keyboardToolbar release], keyboardToolbar = nil;
 	[nextPreviousControl release], nextPreviousControl = nil;
-    
+    [savedDictionary release];
     [super dealloc];
 }
 
@@ -307,72 +310,6 @@
     
 }
 
-- (IBAction)gpssearch:(id)sender {
-
-    if(latitudeLabel) {
-        
-    //once was SUBMIT Values
-    hudDisplayed = YES;
-    useGPSCoordinates = YES;
-    
-    if([centralView isSidebarShowing]) [self menuButtonPressed:self];
-    
-    HUD = [[MBProgressHUD alloc] initWithView:self.view];
-    [self.view addSubview:HUD];
-	
-    // Regiser for HUD callbacks so we can remove it from the window at the right time
-    HUD.delegate = self;
-	
-
-        
-    // Show the HUD while the provided method executes in a new thread
-    [centralView.contentView addSubview:screen2];
-    
-    [HUD showWhileExecuting:@selector(gpsPlusMyTask) onTarget:self withObject:nil animated:YES];
-    
-    }
-    else{
-        UIAlertView *alert = [[[UIAlertView alloc] 
-                               initWithTitle: @"Sorry" 
-                               message:@"We couldn't get your GPS location. Try again later, or use a manual search."
-                               delegate:nil
-                               cancelButtonTitle:nil 
-                               otherButtonTitles:@"OK", nil] autorelease];
-        
-        [alert show];
-
-    
-    }
-}
-
-- (void) gpsPlusMyTask {
-
-    [self reverseGeocodeCurrentLocation];
-    [self myTask];
-
-}
-
-- (void)locationUpdate:(CLLocation *)location {
-    //NSString * text = [NSString stringWithFormat:@"latitude:%@ longitude:%@",location.coordinate.latitude,location.coordinate.longitude];
-    
-    latitude = location.coordinate.latitude;
-	longitude = location.coordinate.longitude;
-
-    latitudeLabel = [NSString stringWithFormat:@"%f",latitude];
-    
-    initialLocation = [location retain];
-    haveCoordinate = YES;
-    
-    
-    NSLog(@"location updated");
-
-}
-
-- (void)locationError:(NSError *)error {
-	locLabel = [error description];
-}
-
-
 - (IBAction)liftSettingsDash {
 	
     LiftInfoViewController *viewController = [[LiftInfoViewController alloc] init];
@@ -386,7 +323,7 @@
 -(IBAction)menuButtonPressed:(id)sender 
 {    
     if(![centralView isLeftSidebarOnTop]) [centralView swapSidebarViewIndecies];
-    [centralView revealSidebar: ! [centralView isSidebarShowing]];    
+    [centralView revealSidebar: ![centralView isSidebarShowing]];    
     
 }
 
@@ -399,44 +336,11 @@
 
 - (IBAction)searchButtonsPressed:(id)sender {
     
+    [self dismissKeyboard:sender];
+
     //once was SUBMIT Values
     hudDisplayed = YES;
  
-    /*
-     
-     -(IBAction)submitValues:(id)sender {
-     
-     [self dismissKeyboard:sender];
-     
-     if(!adInterstitialLoaded) {
-     
-     
-     HUD = [[MBProgressHUD alloc] initWithView:self.view];
-     [self.view addSubview:HUD];
-     
-     HUD.delegate = self;
-     HUD.labelText = @"Loading";
-     
-     [HUD showWhileExecuting:@selector(myTask) onTarget:self withObject:nil animated:YES];
-     }
-     else {
-     
-     hudDisplayed = NO;
-     
-     seconds = 5;
-     displayTimeUp=NO;
-     timer=[NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(startTimer) userInfo:nil repeats:YES];
-     
-     [self showWhileExecuting:@selector(myTask) onTarget:self withObject:nil animated:YES];
-     
-     }
-     }
-     
-     
-    */
-    
-    
-    
     if([centralView isSidebarShowing]) [self menuButtonPressed:self];
     
     HUD = [[MBProgressHUD alloc] initWithView:self.view];
@@ -450,6 +354,71 @@
     
     [HUD showWhileExecuting:@selector(myTask) onTarget:self withObject:nil animated:YES];
     
+}
+
+- (IBAction)gpssearch:(id)sender {
+    
+    if(latitudeLabel) {
+        
+        //once was SUBMIT Values
+        hudDisplayed = YES;
+        useGPSCoordinates = YES;
+        
+        if([centralView isSidebarShowing]) [self menuButtonPressed:self];
+        
+        HUD = [[MBProgressHUD alloc] initWithView:self.view];
+        [self.view addSubview:HUD];
+        
+        // Regiser for HUD callbacks so we can remove it from the window at the right time
+        HUD.delegate = self;
+        
+        
+        
+        // Show the HUD while the provided method executes in a new thread
+        [centralView.contentView addSubview:screen2];
+        
+        [HUD showWhileExecuting:@selector(gpsPlusMyTask) onTarget:self withObject:nil animated:YES];
+        
+    }
+    else{
+        UIAlertView *alert = [[[UIAlertView alloc] 
+                               initWithTitle: @"Sorry" 
+                               message:@"We couldn't get your GPS location. Try again later, or use a manual search."
+                               delegate:nil
+                               cancelButtonTitle:nil 
+                               otherButtonTitles:@"OK", nil] autorelease];
+        
+        [alert show];
+        
+        
+    }
+}
+
+- (void) gpsPlusMyTask {
+    
+    [self reverseGeocodeCurrentLocation];
+    [self myTask];
+    
+}
+
+- (void)locationUpdate:(CLLocation *)location {
+    //NSString * text = [NSString stringWithFormat:@"latitude:%@ longitude:%@",location.coordinate.latitude,location.coordinate.longitude];
+    
+    latitude = location.coordinate.latitude;
+	longitude = location.coordinate.longitude;
+    
+    latitudeLabel = [NSString stringWithFormat:@"%f",latitude];
+    
+    initialLocation = [location retain];
+    haveCoordinate = YES;
+    
+    
+    NSLog(@"location updated");
+    
+}
+
+- (void)locationError:(NSError *)error {
+	locLabel = [error description];
 }
 
 
@@ -481,13 +450,17 @@
     HUD.delegate = self;
 	
     // Show the HUD while the provided method executes in a new thread
-    [HUD showWhileExecuting:@selector(addSearchResults) onTarget:self withObject:nil animated:YES];
+    [HUD showWhileExecuting:@selector(additionalSearchTypeUpdate:) onTarget:self withObject:nil animated:YES];
     
 }
 
-- (void)addSearchResults {
+- (void) additionalSearchTypeUpdate:(id)sender {
+
+    //Get the ID
     
-    sleep(3);
+    NSString * defaultId = [[[savedDictionary objectForKey:[AppSettings sharedSettings].defaultType] objectForKey:kIdKey] stringValue];
+
+    [self updateDetailsToWardWithID:defaultId];
     
     kNumberOfPages++;
     
@@ -499,9 +472,9 @@
     
     pageControl.numberOfPages = kNumberOfPages;
     pageControl.currentPage = kNumberOfPages-1;
+
     
-    [self loadScrollViewWithPage:kNumberOfPages-1];
-    [self loadScrollViewWithPage:kNumberOfPages];
+    [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:NO];
     
 }
 
@@ -513,9 +486,9 @@
 	[self dismissModalViewControllerAnimated:YES];
 }
 
--(IBAction)openInMaps:(id)sender {
+-(IBAction)openInMaps:(InformationViewController*)showingInfoController {
     
-    NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@",initialAddress];
+    NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@",showingInfoController.address];
     
     NSString *escaped_urlString =  [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
     
@@ -677,119 +650,12 @@
     
     NSString *result;
     
-    if(useGPSCoordinates) {
+    UIApplication* app = [UIApplication sharedApplication];
+    app.networkActivityIndicatorVisible = YES;
     
-        useGPSCoordinates = NO;
-        
-        UIApplication* app = [UIApplication sharedApplication];
-        app.networkActivityIndicatorVisible = YES;
-        
-        //use address from form to generate string to send in to geoCodeUsingAddress
-        
-        // Get the Latitude Longitude
-        
-        // somehow determine if the information isn't enough 
-
-        if(badInfo){
-            
-            [HUD hide:YES afterDelay:1];
-            
-            NSLog(@"it's bad info");
-            
-            UIApplication* app = [UIApplication sharedApplication];
-            app.networkActivityIndicatorVisible = NO;
-            
-            return;
-            
-        }
-        
-        //use geocode and address to generate link to correct map
-        
-        //escaped address is only street location
-        
-        NSString * address = [[[NSString alloc]init]autorelease];
-        if([initialPlacemark.thoroughfare isEqualToString:@""]){
-            if([initialPlacemark.subThoroughfare isEqualToString:@""]){
-            address = @"";
-            }
-            else {
-                address = [NSString stringWithFormat:@"&a=%@",initialPlacemark.subThoroughfare];
-            }
-        }
-        else {
-            if([initialPlacemark.subThoroughfare isEqualToString:@""]){
-                address = [NSString stringWithFormat:@"&a=%@",initialPlacemark.thoroughfare];
-            }
-            else {
-                address = [NSString stringWithFormat:@"&a=%@%20%@",initialPlacemark.subThoroughfare, initialPlacemark.thoroughfare];                
-            }
-        
-        }
-        NSString *escaped_address =  [address stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        
-        NSString * city = [[[NSString alloc]init]autorelease];
-        if([initialPlacemark.locality isEqualToString:@""]) {
-            city = @"";
-        }
-        else {
-            city = [NSString stringWithFormat:@"&c=%@",initialPlacemark.locality];
-        }
-        NSString *escaped_city =  [city stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-
-        
-        
-        
-        NSString * state = [[[NSString alloc]init]autorelease];
-        if([initialPlacemark.administrativeArea isEqualToString:@""]) {
-            state = @"";
-        }
-        else {
-            state = [NSString stringWithFormat:@"&s=%@",initialPlacemark.administrativeArea];
-        }
-        NSString *escaped_state =  [state stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        
-        
-        NSString * postal = [[[NSString alloc]init]autorelease];
-        if([initialPlacemark.postalCode isEqualToString:@""]) {
-            postal = @"";
-        }
-        else {
-            postal = [NSString stringWithFormat:@"&p=%@",initialPlacemark.postalCode];        
-        }
-        NSString *escaped_postal =  [postal stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        
-        NSString * nation = [[[NSString alloc]init]autorelease];
-        if([initialPlacemark.country isEqualToString:@""]) {
-            nation = @"";
-        }
-        else {
-            nation = [NSString stringWithFormat:@"&p=%@",initialPlacemark.country];        
-        }
-        NSString *escaped_nation =  [nation stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-
-        
-        
-        // create url to contact LDS.org for value
-        NSString *requestString = [NSString stringWithFormat:@"http://lds.org/maps/m/index.jsf?lat=%f&lng=%f%@%@%@%@%@&assign=wards", latitude, longitude, escaped_address, escaped_city, escaped_state, escaped_postal, escaped_nation];
-        
-        NSURL *url = [NSURL URLWithString:requestString];
-        
-        
-        result = [NSString stringWithContentsOfURL: url encoding: NSUTF8StringEncoding error:NULL];
-        
-        
-        
-    }
-    else {
-        
-        
-        UIApplication* app = [UIApplication sharedApplication];
-        app.networkActivityIndicatorVisible = YES;
-        
+    
+    if(!useGPSCoordinates) { //set if users presses 'GPS Search Button'
+                
         //use address from form to generate string to send in to geoCodeUsingAddress
         
         NSString * nation = [[[NSString alloc]init]autorelease];
@@ -826,7 +692,7 @@
         }
         
         
-        [self geoCodeUsingAddress:geoSearch];    //[self geoCodeUsingAddress:@"273 E 9670 S Sandy, UT 84070"];
+        [self geoCodeUsingAddress:geoSearch];
         
         if(badInfo){
             
@@ -841,286 +707,173 @@
             
         }
         
-        //use geocode and address to generate link to correct map
-        
-        //escaped address is only street location
-        NSString * address = [[[NSString alloc]init]autorelease];
-        if([_textField1.text isEqualToString:@""]) {
-            address = @"";
-        }
-        else {
-            address = [NSString stringWithFormat:@"&a=%@",_textField1.text];
-        }
-        NSString *escaped_address =  [address stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        NSString * city = [[[NSString alloc]init]autorelease];
-        if([_textField2.text isEqualToString:@""]) {
-            city = @"";
-        }
-        else {
-            city = [NSString stringWithFormat:@"&c=%@",_textField2.text];
-        }
-        NSString *escaped_city =  [city stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        NSString * state = [[[NSString alloc]init]autorelease];
-        if([_textField3.text isEqualToString:@""]) {
-            state = @"";
-        }
-        else {
-            state = [NSString stringWithFormat:@"&s=%@",_textField3.text];
-        }
-        NSString *escaped_state =  [state stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-        NSString * postal = [[[NSString alloc]init]autorelease];
-        if([_textField4.text isEqualToString:@""]) {
-            postal = @"";
-        }
-        else {
-            postal = [NSString stringWithFormat:@"&p=%@",_textField4.text];        
-        }
-        
-        NSString *escaped_postal =  [postal stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-        
-  
-    NSString *requestString = [NSString stringWithFormat:@"http://lds.org/maps/m/index.jsf?lat=%f&lng=%f%@%@%@%@%@&assign=wards", latitude, longitude, escaped_address, escaped_city, escaped_state, escaped_postal, escaped_nation];
-        
-        
-    NSURL *url = [NSURL URLWithString:requestString];
-    
-        
-    result = [NSString stringWithContentsOfURL: url encoding: NSUTF8StringEncoding error:NULL];
-    
-        NSLog(@"Hello world");
-        int x = 0;
-        
+
         
     }
     
+    useGPSCoordinates = NO;
     
+    // create url to contact LDS.org for value
+    NSString *requestString = [NSString stringWithFormat:@"http://www.lds.org/rcmaps/services/layers/assigned?latitude=%f&longitude=%f&lang=eng", latitude, longitude];
     
+    NSError* err = nil;
+    NSURLResponse* response = nil;
+    NSMutableURLRequest* request = [[[NSMutableURLRequest alloc] init] autorelease];
     
+    NSURL*URL = [NSURL URLWithString:requestString];
+    [request setURL:URL];
+    [request setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+    [request setTimeoutInterval:30];
+    NSData* jsonData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&err];
+    
+    NSArray * assignedArray = [jsonData objectFromJSONData];
+    
+    //Use default setting to find ward they want
+    
+    savedDictionary = nil;
+    
+    NSMutableDictionary * assignedLocations = [[[NSMutableDictionary alloc] init] autorelease];
+    
+    for (NSDictionary *rawAssign in assignedArray) {
         
-    //I need to find the range for the ID still
-    NSRange rangeStart = [result rangeOfString:@"index.jsf?id"];
-    
-    if(rangeStart.location != NSNotFound)
-    {
-        NSRange rangeEnd = [result rangeOfString:@">" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart.location + rangeStart.length, [result length] - (rangeStart.location + rangeStart.length))];
+        [assignedLocations setObject:rawAssign forKey:[rawAssign objectForKey:kTypeKey]];
         
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange = NSMakeRange((rangeStart.location + rangeStart.length + 1), (rangeEnd.location - (rangeStart.location + rangeStart.length + 1) - 1));
+    }    
+    
+    savedDictionary = [assignedLocations retain];
         
-        //set meetinghouseID to the string
-        meetinghouseID = [[result substringWithRange:trueRange] retain];
-    }
+    //Get the ID
     
-    wardURL = [[NSString stringWithFormat:@"http://lds.org/maps/m/index.jsf?id=%@",meetinghouseID] retain];
-    
-    NSURL * url1 = [NSURL URLWithString:wardURL];
-    
-    
-    loadedPageContents = [NSString stringWithContentsOfURL: url1 encoding: NSUTF8StringEncoding error:NULL];
+    NSDictionary *ward = [assignedLocations objectForKey:[AppSettings sharedSettings].defaultType];
+    NSString * defaultId = [ward objectForKey:kIdKey];
 
+    //Get the details for the ID
+    [self updateDetailsToWardWithID:defaultId];
+
+        answerFound = YES;
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart00 = [loadedPageContents rangeOfString:@"<img src="];
-    
-    if(rangeStart00.location != NSNotFound)
-    {
-        NSRange rangeEnd00 = [loadedPageContents rangeOfString:@" />" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart00.location + rangeStart00.length, [loadedPageContents length] - (rangeStart00.location + rangeStart00.length))];
+        if(hudDisplayed) { 
         
-        //Use the ranges above to find the link. Subtracting 200 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange00 = NSMakeRange((rangeStart00.location + rangeStart00.length + 0), (rangeEnd00.location - (rangeStart00.location + rangeStart00.length + 0) - 0));
-        
-        NSString * imageURL = [[[NSString alloc] init]autorelease];
-        
-        //set address to the string
-        imageURL = [[loadedPageContents substringWithRange:trueRange00] copy];
+            UIApplication* app = [UIApplication sharedApplication];
+            app.networkActivityIndicatorVisible = NO;
                 
-        imageURL = [imageURL stringByReplacingOccurrencesOfString:@"amp;" withString:@""];
-
-        NSRange rangeEndSig = [imageURL rangeOfString:@"&signature="];
-                
-        if(rangeEndSig.location != NSNotFound)
-        {
-            NSRange rangeStartSig = NSMakeRange(0, 0);
-            
-            //Use the ranges above to find the link. Subtracting 200 because they are sending back a target. We need to cut that off so we just get a URL
-            NSRange trueRangeSig = NSMakeRange((rangeStartSig.location + rangeStartSig.length), (rangeEndSig.location - (rangeStartSig.location + rangeStartSig.length + 0) - 0));
-
-            NSString * signatureImageURL = [[imageURL substringWithRange:trueRangeSig] copy];
-            
-            imageURL = signatureImageURL;
+            [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:YES];
+        
         }
-            
-        imageURL = [NSString stringWithFormat:@"<html><body style=\"margin: 0px; padding: 0px;\"><img src=%@\" height=\"106\" width=\"106\" /></body></html>",imageURL];
-        
-        imageURL = [imageURL stringByReplacingOccurrencesOfString:@"client=gme-lds&" withString:@""];
+}
 
-        
-        initialMapImage = [imageURL retain];
-        
-    }  
 
-    
-    
-    //Create ranges to find the actual link tag
-    NSRange rangeStart0 = [loadedPageContents rangeOfString:@"Selected location"];
-    
-    if(rangeStart0.location != NSNotFound)
-    {
-        NSRange rangeEnd0 = [loadedPageContents rangeOfString:@"subtitle" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart0.location + rangeStart0.length, [loadedPageContents length] - (rangeStart0.location + rangeStart0.length))];
-        
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange0 = NSMakeRange((rangeStart0.location + rangeStart0.length + 34), (rangeEnd0.location - (rangeStart0.location + rangeStart0.length + 34) - 18));
-        
-        //set address to the string
-        initialWardName = [[loadedPageContents substringWithRange:trueRange0] copy];
-        
-        
-        initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"\n" withString:@"  "];        
-        initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"  			<br />" withString:@" "];
-        initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"  " withString:@" "];
-                
-    }  
+- (void)updateDetailsToWardWithID:(NSString *)wardID {
 
+    // create url to contact LDS.org for value
+    NSString *detailString = [NSString stringWithFormat:@"http://www.lds.org/rcmaps/services/layers/details?lang=eng&id=%@&layer=ward", wardID];
+    
+    NSError* errDetail = nil;
+    NSURLResponse* responseDetail = nil;
+    NSMutableURLRequest* requestDetail = [[[NSMutableURLRequest alloc] init] autorelease];
+    
+    NSURL*URLDetail = [NSURL URLWithString:detailString];
+    [requestDetail setURL:URLDetail];
+    [requestDetail setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+    [requestDetail setTimeoutInterval:30];
+    NSData* jsonDataDetail = [NSURLConnection sendSynchronousRequest:requestDetail returningResponse:&responseDetail error:&errDetail];
+    
+    NSDictionary * details = [jsonDataDetail objectFromJSONData];
+    
+    initialWardName = nil;
+    
+    initialWardName = [details objectForKey:kNameKey];
+    initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"  " withString:@" "];
+    initialWardName = [initialWardName stringByReplacingOccurrencesOfString:@"\n" withString:@""];
     
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart1 = [loadedPageContents rangeOfString:@"address"];
+    //set address to the string
     
-    if(rangeStart1.location != NSNotFound)
-    {
-        NSRange rangeEnd1 = [loadedPageContents rangeOfString:@"label" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart1.location + rangeStart1.length, [loadedPageContents length] - (rangeStart1.location + rangeStart1.length))];
-        
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange1 = NSMakeRange((rangeStart1.location + rangeStart1.length + 11), (rangeEnd1.location - (rangeStart1.location + rangeStart1.length + 11) - 18));
-        
-        //set address to the string
-        initialAddress = [[loadedPageContents substringWithRange:trueRange1] copy];
-        
-        
-        initialAddress = [initialAddress stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        initialAddress = [initialAddress stringByReplacingOccurrencesOfString:@"\n" withString:@"  "];        
-        initialAddress = [initialAddress stringByReplacingOccurrencesOfString:@"  			<br />" withString:@" "];
-        
-        initialAddress = [initialAddress lowercaseString];
-        initialAddress = [initialAddress capitalizedString];
-        
-        
-    }  
+    initialAddress = nil;
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart2 = [loadedPageContents rangeOfString:@"First Meeting:"];
+    initialAddress = [NSString stringWithFormat:@"%@ %@ %@ %@ %@",[[details objectForKey:kAddressKey] objectForKey:kStreetKey],[[details objectForKey:kAddressKey] objectForKey:kCityKey],[[details objectForKey:kAddressKey] objectForKey:kStateKey],[[details objectForKey:kAddressKey] objectForKey:kZipKey],[[details objectForKey:kAddressKey] objectForKey:kCountryKey]];
+    initialAddress = [initialAddress stringByReplacingOccurrencesOfString:@"  " withString:@" "];
+    initialAddress = [initialAddress stringByReplacingOccurrencesOfString:@"<null>" withString:@""];    
+    initialAddress = [initialAddress lowercaseString];
+    initialAddress = [initialAddress capitalizedString];
     
-    if(rangeStart2.location != NSNotFound)
-    {
-        NSRange rangeEnd2 = [loadedPageContents rangeOfString:@"</div" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart2.location + rangeStart2.length, [loadedPageContents length] - (rangeStart2.location + rangeStart2.length))];
-        
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange2 = NSMakeRange((rangeStart2.location + rangeStart2.length), (rangeEnd2.location - (rangeStart2.location + rangeStart2.length)));
-        
-        //set address to the string
-        initialFirstMeeting = [[loadedPageContents substringWithRange:trueRange2] copy];
-        
-        initialFirstMeeting = [initialFirstMeeting stringByReplacingOccurrencesOfString:@"</label>" withString:@""];
-        
-        initialFirstMeeting = [initialFirstMeeting stringByReplacingOccurrencesOfString:@"				<span>" withString:@""];
-        
-        initialFirstMeeting = [initialFirstMeeting stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        
-        initialFirstMeeting = [initialFirstMeeting stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-        
-    }
+    //set first meeting to string
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart3 = [loadedPageContents rangeOfString:@"Worship Service:"];
+    initialFirstMeeting = nil;
     
-    if(rangeStart3.location != NSNotFound)
-    {
-        NSRange rangeend3 = [loadedPageContents rangeOfString:@"</div" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart3.location + rangeStart3.length, [loadedPageContents length] - (rangeStart3.location + rangeStart3.length))];
-        
-        //Use the ranges above to find the link. Subtracting 30 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange3 = NSMakeRange((rangeStart3.location + rangeStart3.length), (rangeend3.location - (rangeStart3.location + rangeStart3.length)));
-        
-        //set address to the string
-        initialWorshipService = [[loadedPageContents substringWithRange:trueRange3] copy];
-        
-        
-        initialWorshipService = [initialWorshipService stringByReplacingOccurrencesOfString:@"</label>" withString:@""];
-        
-        initialWorshipService = [initialWorshipService stringByReplacingOccurrencesOfString:@"				<span>" withString:@""];
-        
-        initialWorshipService = [initialWorshipService stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        
-        initialWorshipService = [initialWorshipService stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-                
-    }
+    initialFirstMeeting = [details objectForKey:kHoursKey];
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart4 = [loadedPageContents rangeOfString:@"Leader:"];
+    //set worship service to string
+    initialWorshipService = nil;
     
-    if(rangeStart4.location != NSNotFound)
-    {
-        NSRange rangeEnd4 = [loadedPageContents rangeOfString:@"</span>" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart4.location + rangeStart4.length, [loadedPageContents length] - (rangeStart4.location + rangeStart4.length))];
-        
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange4 = NSMakeRange((rangeStart4.location + rangeStart4.length + 20), (rangeEnd4.location - (rangeStart4.location + rangeStart4.length + 20) - 0));
-        
-        //set address to the string
-        initialBishopName = [[loadedPageContents substringWithRange:trueRange4] copy];
-        
-        
-        initialBishopName = [initialBishopName stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        initialBishopName = [initialBishopName stringByReplacingOccurrencesOfString:@"\n" withString:@"  "];        
-        initialBishopName = [initialBishopName stringByReplacingOccurrencesOfString:@"  			<br />" withString:@" "];
+    initialWorshipService = [details objectForKey:kWorshipTimeKey];
+    
+    float latVal = [[[details objectForKey:kPositionKey] objectForKey:kLatitudeKey] floatValue];
+    float longVal = [[[details objectForKey:kPositionKey] objectForKey:kLongitudeKey] floatValue];
+    
+    NSString * locationString = [NSString stringWithFormat:@"%f,%f",latVal,longVal];
+    
+    NSString * firstHalf = [NSString stringWithFormat:@"<html><body style=\"margin: 0px; padding: 0px;\"><img style=\"-webkit-user-select: none\" src=\"http://maps.googleapis.com/maps/api/staticmap?center=%@&amp;markers=color:blue%7C",locationString];
+    
+    NSString * secondHalf = [NSString stringWithFormat:@"%@&amp;zoom=14&amp;size=106x106&amp;sensor=false\"></body></html>",locationString];
+    
+    NSString * imageHTML = [NSString stringWithFormat:@"%@%@",firstHalf,secondHalf];
+    
+    initialMapImage = [imageHTML retain];
+    
+    //Check number of contacts
+    
+    int contactCount = [[details objectForKey:kContactsKey] count];
+    
+    if(contactCount){
+        //set bishop name to string
+        initialBishopName = [NSString stringWithFormat:@"%@ %@",[[[details objectForKey:kContactsKey] objectAtIndex:0] objectForKey:kTitleKey],[[[details objectForKey:kContactsKey] objectAtIndex:0] objectForKey:kNameKey]];
         initialBishopName = [initialBishopName stringByReplacingOccurrencesOfString:@"  " withString:@" "];
-        
+        initialBishopName = [initialBishopName stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         initialBishopName = [initialBishopName lowercaseString];
         initialBishopName = [initialBishopName capitalizedString];
         
-    }  
+        //set bishop phone to the string
+        initialBishopPhone = [[[details objectForKey:kContactsKey] objectAtIndex:0] objectForKey:kPhoneKey];
+        initialBishopPhone = [initialBishopPhone stringByReplacingOccurrencesOfString:@"+" withString:@""];
+    } 
     
-    //Create ranges to find the actual link tag
-    NSRange rangeStart5 = [loadedPageContents rangeOfString:@"tel:"];
-    
-    if(rangeStart5.location != NSNotFound)
-    {
-        NSRange rangeEnd5 = [loadedPageContents rangeOfString:@"</a>" options:NSCaseInsensitiveSearch range:NSMakeRange(rangeStart5.location + rangeStart5.length, [loadedPageContents length] - (rangeStart5.location + rangeStart5.length))];
-        
-        //Use the ranges above to find the link. Subtracting 20 because they are sending back a target. We need to cut that off so we just get a URL
-        NSRange trueRange5 = NSMakeRange((rangeStart5.location + rangeStart5.length + 17), (rangeEnd5.location - (rangeStart5.location + rangeStart5.length + 17) - 0));
-        
-        //set address to the string
-        initialBishopPhone = [[loadedPageContents substringWithRange:trueRange5] copy];
-        
-    
-        initialBishopPhone = [initialBishopPhone stringByReplacingOccurrencesOfString:@"</span>" withString:@""];
-        initialBishopPhone = [initialBishopPhone stringByReplacingOccurrencesOfString:@"\n" withString:@"  "];        
-        initialBishopPhone = [initialBishopPhone stringByReplacingOccurrencesOfString:@"  			<br />" withString:@" "];
-        initialBishopPhone = [initialBishopPhone stringByReplacingOccurrencesOfString:@"  " withString:@" "];
-        
-        initialBishopPhone = [initialBishopPhone lowercaseString];
-        initialBishopPhone = [initialBishopPhone capitalizedString];
-        
-    }  
-    
-    answerFound = YES;
-    
-    if(hudDisplayed) { 
-        
-        UIApplication* app = [UIApplication sharedApplication];
-        app.networkActivityIndicatorVisible = NO;
-                
-        [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:YES];
-        
-    }
-    
-    //load webview with url
-    //webview finished loading should have correct code.
 }
 
+
+- (void)infoViewDidPin:(InformationViewController*)showingInfoController {
+
+
+    
+}
+
+
+- (void)infoViewDidMapIt:(InformationViewController*)showingInfoController {
+
+    infoViewSentMe = YES;
+    [self openInMaps:showingInfoController];
+    
+}
+
+#pragma mark -
+#pragma mark Screen 3 Methods
+
+-(IBAction)checkboxSelected:(id)sender
+{
+    UIButton *btn = (UIButton *) sender; 
+    
+    if([btn isSelected]){ 
+    
+        [btn setSelected:NO]; 
+        
+    }
+    else
+    { 
+        
+        [btn setSelected:YES]; 
+    
+    }
+}
 
 
 #pragma mark -
@@ -1134,13 +887,14 @@
     // replace the placeholder if necessary
     InformationViewController *controller = [informationViews objectAtIndex:page];    
         controller = [[InformationViewController alloc] initWithPageNumber:page];
+        controller.delegate = self;
         controller.firstMeetingTime = initialFirstMeeting;
         controller.worshipServiceTime = initialWorshipService;
         controller.address = initialAddress;
         controller.wardName = initialWardName;
-    controller.bishopsName = initialBishopName;
-    controller.phoneNumber = initialBishopPhone;
-    controller.mapImage = initialMapImage;
+        controller.bishopsName = initialBishopName;
+        controller.phoneNumber = initialBishopPhone;
+        controller.mapImage = initialMapImage;
         [informationViews replaceObjectAtIndex:page withObject:controller];
 	
     // add the controller's view to the scroll view
@@ -1588,6 +1342,12 @@
 }
 
 
+- (IBAction)anotherSearch:(id)sender {
+    [centralView revealSidebar: YES];
+
+    
+    
+}
 
 
 

@@ -10,6 +10,7 @@
 
 @implementation InformationViewController
 
+@synthesize delegate = _delegate;
 @synthesize address = _address;
 @synthesize bishopsName = _bishopsName;
 @synthesize phoneNumber = _phoneNumber;
@@ -79,6 +80,16 @@
 
    return YES;
 
+}
+
+- (IBAction)mapIt:(id)sender {
+
+    if([_delegate respondsToSelector:@selector(infoViewDidMapIt:)]){
+
+        [_delegate infoViewDidMapIt:self];
+        
+    }
+    
 }
 
 - (void)viewDidUnload

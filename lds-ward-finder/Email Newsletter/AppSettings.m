@@ -9,7 +9,7 @@
 #import "AppSettings.h"
 #import "SynthesizeSingleton.h"
 
-
+static NSString *const kDefaultType = @"defaultType";
 static NSString *const kInvitedToRegister = @"invitedToRegister";
 static NSString *const kNewVersionInvited = @"newVersionInvited";
 static NSString *const kLaunchCount = @"launchCount";
@@ -20,6 +20,20 @@ static NSString *const kGpsPurchased = @"gpsPurchased";
 
 
 SYNTHESIZE_SINGLETON_FOR_CLASS(AppSettings, sharedSettings);
+
+- (NSString *)defaultType {
+    return @"ward";
+//	return [[NSUserDefaults standardUserDefaults] stringForKey:kDefaultType];
+}
+
+- (void)setDefaultType:(NSString *)defaultType {
+	
+	[[NSUserDefaults standardUserDefaults] setObject:defaultType forKey:kDefaultType];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+    
+}
+
+
 
 - (BOOL)invitedToRegister {
 	return [[NSUserDefaults standardUserDefaults] boolForKey:kInvitedToRegister];

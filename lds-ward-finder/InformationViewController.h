@@ -8,11 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol SuccessPopupDelegate;
-
+@protocol InformationViewControllerDelegate;
 
 @interface InformationViewController : UIViewController <UIWebViewDelegate> {
 
+    id<NSObject, InformationViewControllerDelegate> delegate;
+    
     IBOutlet UITextView * addressField;
     IBOutlet UITextView * phoneNumberField;
     IBOutlet UITextView * bishopsNameField;
@@ -31,6 +32,8 @@
 
 }
 
+@property (nonatomic, assign) IBOutlet id <InformationViewControllerDelegate, NSObject> delegate;
+
 @property (nonatomic, retain) NSString * address;
 @property (nonatomic, retain) NSString * phoneNumber;
 @property (nonatomic, retain) NSString * bishopsName;
@@ -41,15 +44,15 @@
 
 
 -(id)initWithPageNumber:(int)page;
-
-
+-(IBAction)mapIt:(id)sender;
 
 
 @end
 
 
-@protocol SuccessPopupDelegate
+@protocol InformationViewControllerDelegate
 
 - (void)infoViewDidPin:(InformationViewController*)showingInfoController;
+- (void)infoViewDidMapIt:(InformationViewController*)showingInfoController;
 
 @end
