@@ -77,7 +77,7 @@
 
     //successview controller stuff
     
-    IBOutlet UIScrollView * scrollView;
+    IBOutlet UIScrollView * scrollView;    
     IBOutlet UIPageControl * pageControl;
     
     BOOL pageControlUsed;

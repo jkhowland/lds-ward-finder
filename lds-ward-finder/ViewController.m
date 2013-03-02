@@ -120,7 +120,7 @@
     //TODO - store locations in NSUserDefaults load app at first with 'pinned locations'
     // Beginning of paging scroll view
     
-    kNumberOfPages = 4;
+    kNumberOfPages = 1;
     
     NSMutableArray *controllers = [[NSMutableArray alloc] init];
     
@@ -128,9 +128,10 @@
         [controllers addObject:[NSNull null]];
     }
     
-    
     self.informationViews = controllers;
     
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 44, 320, 320)];
+    [screen2 addSubview:scrollView];
     scrollView.pagingEnabled = YES;
     scrollView.contentSize = CGSizeMake(scrollView.frame.size.width * kNumberOfPages, scrollView.frame.size.height);
     scrollView.showsHorizontalScrollIndicator = NO;
@@ -138,10 +139,13 @@
     scrollView.scrollsToTop = NO;
     scrollView.delegate = self;
     
-    pageControl.numberOfPages = kNumberOfPages-1;
-    pageControl.currentPage = kNumberOfPages-1;
-
+    pageControl.numberOfPages = kNumberOfPages - 1;
+    pageControl.currentPage = kNumberOfPages - 1;
     
+    if(pageControl.numberOfPages == 1) {
+        pageControl.hidden = YES;
+    }
+
     //End of paging scroll view
     
     // Create a default style RevealSidebarView
@@ -433,30 +437,29 @@
     
 }
 
-- (void) additionalSearchTypeUpdate:(id)sender {
-
-    //Get the ID
-    
-    NSString * defaultId = [[[savedDictionary objectForKey:[AppSettings sharedSettings].defaultType] objectForKey:kIdKey] stringValue];
-
-    [self updateDetailsToWardWithID:defaultId];
-    
-    kNumberOfPages++;
-    
-    scrollView.pagingEnabled = YES;
-    scrollView.contentSize = CGSizeMake(scrollView.frame.size.width * kNumberOfPages, scrollView.frame.size.height);
-    scrollView.showsHorizontalScrollIndicator = NO;
-    scrollView.showsVerticalScrollIndicator = NO;
-    scrollView.scrollsToTop = NO;
-    
-    pageControl.numberOfPages = kNumberOfPages;
-    pageControl.currentPage = kNumberOfPages-1;
-
-    
-    [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:NO];
-    
-}
-
+//- (void) additionalSearchTypeUpdate:(id)sender {
+//
+//    //Get the ID
+//    
+//    NSString * defaultId = [[[savedDictionary objectForKey:[AppSettings sharedSettings].defaultType] objectForKey:kIdKey] stringValue];
+//
+//    [self updateDetailsToWardWithID:defaultId];
+//    
+//    kNumberOfPages++;
+//    
+//    scrollView.pagingEnabled = YES;
+//    scrollView.contentSize = CGSizeMake(scrollView.frame.size.width * kNumberOfPages, scrollView.frame.size.height);
+//    scrollView.showsHorizontalScrollIndicator = NO;
+//    scrollView.showsVerticalScrollIndicator = NO;
+//    scrollView.scrollsToTop = NO;
+//    
+//    pageControl.numberOfPages = kNumberOfPages;
+//    pageControl.currentPage = kNumberOfPages-1;
+//
+//    
+//    [self performSelectorOnMainThread:@selector(loadScrollViewOnMainSelector) withObject:nil waitUntilDone:NO];
+//    
+//}
 
 - (void)liftInfoViewControllerDidFinish:(LiftInfoViewController*) liftInfoViewController {
 	//[self.mainView snapToPage];
@@ -821,8 +824,14 @@
     if (page >= kNumberOfPages) return;
     
     // replace the placeholder if necessary
-    InformationViewController *controller = [_informationViews objectAtIndex:page];
+    InformationViewController *controller;
+
+    if([_informationViews objectAtIndex:page] == [NSNull null]) {
         controller = [[InformationViewController alloc] initWithPageNumber:page];
+    } else {
+        controller = [_informationViews objectAtIndex:page];
+    }
+    
         controller.delegate = self;
         controller.firstMeetingTime = initialFirstMeeting;
         controller.worshipServiceTime = initialWorshipService;
@@ -831,7 +840,8 @@
         controller.bishopsName = initialBishopName;
         controller.phoneNumber = initialBishopPhone;
         controller.mapImage = initialMapImage;
-        [_informationViews replaceObjectAtIndex:page withObject:controller];
+    
+    [_informationViews replaceObjectAtIndex:page withObject:controller];
 	
     // add the controller's view to the scroll view
     if (nil == controller.view.superview) {
